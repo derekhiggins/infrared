@@ -3,6 +3,10 @@
       file: "{{ templates_list_file}}"
       name: current_file
 
+- stat:
+      path: "{{ templates_list_file }}.template"
+  register: templates_list_file_override
+
 - name: find the template file or corresponding j2 template
   find:
       path: "{{ item| dirname }}"
@@ -36,3 +40,9 @@
   when: current_file.custom_templates is defined
   vars:
       raw_name: "{{ templates_list_file | basename | splitext | first }}"
+
+- name: create custom templates file2
+  template:
+      dest: "{{ ansible_user_dir }}/{{ install.deployment.files | basename }}/{{ raw_name }}.yaml"
+      src: "{{ templates_list_file }}.template"
+  when: templates_list_file_override.stat.exists
